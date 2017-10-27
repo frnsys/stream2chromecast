@@ -477,6 +477,10 @@ class CCMediaController():
 
 
 
-
+    def seek(self, amount):
+        status = self.get_status()
+        current_time = status['media_status']['currentTime']
+        current_time = max(0, current_time + amount)
+        self.control('SEEK', parameters={'currentTime': current_time})
 
 

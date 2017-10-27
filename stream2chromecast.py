@@ -656,6 +656,11 @@ def set_volume(v, device_name=None):
     CCMediaController(device_name=device_name).set_volume(v)
 
 
+def seek(amount, device_name=None):
+    """ stop playback and quit the media player app on the chromecast """
+    CCMediaController(device_name=device_name).seek(amount)
+
+
 def list_devices():
     print "Searching for devices, please wait..."
     device_ips = cc_device_finder.search_network(device_limit=None, time_limit=10)
@@ -775,6 +780,9 @@ def run():
 
     elif args[0] == "-mute":
         set_volume(0, device_name=device_name)
+
+    elif args[0] == "-seek":
+        seek(float(args[1]), device_name=device_name)
 
     elif args[0] == "-transcode":
         arg2 = args[1]
