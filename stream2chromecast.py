@@ -173,13 +173,13 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         self.send_headers(filepath)
 
-        print "sending data"
+        print("sending data")
         try:
             self.write_response(filepath)
-        except socket.error, e:
+        except socket.error as e:
             if isinstance(e.args, tuple):
                 if e[0] in (errno.EPIPE, errno.ECONNRESET):
-                   print "disconnected"
+                   print("disconnected")
                    self.suppress_socket_error_report = True
                    return
 
@@ -238,7 +238,7 @@ class TranscodingRequestHandler(RequestHandler):
 
     def write_response(self, filepath):
         if self.bufsize != 0:
-            print "transcode buffer size:", self.bufsize
+            print("transcode buffer size:", self.bufsize)
 
         ffmpeg_command = self.transcoder_command % (self.transcode_input_options, filepath, self.transcode_options)
 
@@ -277,7 +277,7 @@ def get_transcoder_cmds(preferred_transcoder=None):
             transcoder_cmd = "ffmpeg"
             probe_cmd = "ffprobe"
         elif avconv_installed:
-            print "unable to find ffmpeg - using avconv"
+            print("unable to find ffmpeg - using avconv")
             transcoder_cmd = "avconv"
             probe_cmd = "avprobe"
 
@@ -287,7 +287,7 @@ def get_transcoder_cmds(preferred_transcoder=None):
             transcoder_cmd = "avconv"
             probe_cmd = "avprobe"
         elif ffmpeg_installed:
-            print "unable to find avconv - using ffmpeg"
+            print("unable to find avconv - using ffmpeg")
             transcoder_cmd = "ffmpeg"
             probe_cmd = "ffprobe"
 
@@ -349,7 +349,7 @@ def get_mimetype(filename, ffprobe_cmd=None):
         if file_mimetype.startswith("video/") or file_mimetype.startswith("audio/"):
             mimetype = file_mimetype
 
-            print "OS identifies the mimetype as :", mimetype
+            print("OS identifies the mimetype as :", mimetype)
             return mimetype
     except:
         pass
@@ -420,10 +420,10 @@ def play(filename, transcode=False, transcoder=None, transcode_options=None, tra
 
     if os.path.isfile(filename):
         filename = os.path.abspath(filename)
-        print "source is file: %s" % filename
+        print("source is file: %s" % filename)
     else:
         if transcode and (filename.lower().startswith("http://") or filename.lower().startswith("https://") or filename.lower().startswith("rtsp://")):
-            print "source is URL: %s" % filename
+            print("source is URL: %s" % filename)
         else:
             sys.exit("media file %s not found" % filename)
 
@@ -435,7 +435,7 @@ def play(filename, transcode=False, transcoder=None, transcode_options=None, tra
     status = cast.get_status()
     webserver_ip = status['client'][0]
 
-    print "local ip address:", webserver_ip
+    print("local ip address:", webserver_ip)
 
 
     req_handler = RequestHandler
@@ -457,7 +457,7 @@ def play(filename, transcode=False, transcoder=None, transcode_options=None, tra
 
             req_handler.bufsize = transcode_bufsize
         else:
-            print "No transcoder is installed. Attempting standard playback"
+            print("No transcoder is installed. Attempting standard playback")
 
 
 
@@ -479,7 +479,7 @@ def play(filename, transcode=False, transcoder=None, transcode_options=None, tra
 
     url = "http://%s:%s?%s" % (webserver_ip, str(server.server_port), urllib.quote_plus(filename, "/"))
 
-    print "URL & content-type: ", url, req_handler.content_type
+    print("URL & content-type: ", url, req_handler.content_type)
 
 
     # create another webserver to handle a request for the subtitles file, if specified in the subtitles parameter
@@ -497,9 +497,9 @@ def play(filename, transcode=False, transcoder=None, transcode_options=None, tra
             thread2.start()
 
             sub = "http://%s:%s?%s" % (webserver_ip, str(sub_server.server_port), urllib.quote_plus(subtitles, "/"))
-            print "sub URL: ", sub
+            print("sub URL: ", sub)
         else:
-            print "Subtitles file %s not found" % subtitles
+            print("Subtitles file %s not found" % subtitles)
 
 
     load(cast, url, req_handler.content_type, sub, subtitles_language)
@@ -510,12 +510,12 @@ def play(filename, transcode=False, transcoder=None, transcode_options=None, tra
 def load(cast, url, mimetype, sub=None, sub_language=None):
     """ load a chromecast instance with a url and wait for idle state """
     try:
-        print "loading media..."
+        print("loading media...")
 
         cast.load(url, mimetype, sub, sub_language)
 
         # wait for playback to complete before exiting
-        print "waiting for player to finish - press ctrl-c to stop..."
+        print("waiting for player to finish - press ctrl-c to stop...")
 
         idle = False
         while not idle:
@@ -523,12 +523,12 @@ def load(cast, url, mimetype, sub=None, sub_language=None):
             idle = cast.is_idle()
 
     except KeyboardInterrupt:
-        print
-        print "stopping..."
+        print()
+        print("stopping...")
         cast.stop()
 
     finally:
-        print "done"
+        print("done")
 
 
 
@@ -592,14 +592,14 @@ def playurl(url, device_name=None):
                             redirect_location = header[1]
                 if redirect_location.startswith("http") is False:
                     redirect_location = get_full_url(url, redirect_location)
-                print "Redirecting to " + redirect_location
+                print("Redirecting to " + redirect_location)
                 resp = get_resp(redirect_location)
             if resp.status != 200:
                 sys.exit("HTTP error:" + str(resp.status) + " - " + resp.reason)
         else:
             sys.exit("HTTP error:" + str(resp.status) + " - " + resp.reason)
 
-    print "Found HTTP resource"
+    print("Found HTTP resource")
 
     headers = resp.getheaders()
 
@@ -611,10 +611,10 @@ def playurl(url, device_name=None):
                 mimetype = header[1]
 
     if mimetype != None:
-        print "content-type:", mimetype
+        print("content-type:", mimetype)
     else:
         mimetype = "video/mp4"
-        print "resource does not specify mimetype - using default:", mimetype
+        print("resource does not specify mimetype - using default:", mimetype)
 
     cast = CCMediaController(device_name=device_name)
     load(cast, url, mimetype)
@@ -639,7 +639,7 @@ def stop(device_name=None):
 
 def get_status(device_name=None):
     """ print the status of the chromecast device """
-    print CCMediaController(device_name=device_name).get_status()
+    print(CCMediaController(device_name=device_name).get_status())
 
 def volume_up(device_name=None):
     """ raise the volume by 0.1 """
@@ -662,28 +662,28 @@ def seek(amount, device_name=None):
 
 
 def list_devices():
-    print "Searching for devices, please wait..."
+    print("Searching for devices, please wait...")
     device_ips = cc_device_finder.search_network(device_limit=None, time_limit=10)
 
-    print "%d devices found" % len(device_ips)
+    print("%d devices found" % len(device_ips))
 
     for device_ip in device_ips:
-        print device_ip, ":", cc_device_finder.get_device_name(device_ip)
+        print(device_ip, ":", cc_device_finder.get_device_name(device_ip))
 
 
 def print_ident():
     """ display initial messages """
-    print
-    print "-----------------------------------------"
-    print
-    print "Stream2Chromecast version:%s" % VERSION
-    print
-    print "Copyright (C) 2014-2016 Pat Carter"
-    print "GNU General Public License v3.0"
-    print "https://www.gnu.org/licenses/gpl-3.0.html"
-    print
-    print "-----------------------------------------"
-    print
+    print()
+    print("-----------------------------------------")
+    print()
+    print("Stream2Chromecast version:%s" % VERSION)
+    print()
+    print("Copyright (C) 2014-2016 Pat Carter")
+    print("GNU General Public License v3.0")
+    print("https://www.gnu.org/licenses/gpl-3.0.html")
+    print()
+    print("-----------------------------------------")
+    print()
 
 
 def validate_args(args):
@@ -713,7 +713,7 @@ def get_named_arg_value(arg_name, args, integer=False):
             try:
                 int_arg_val = int(arg_val)
             except ValueError:
-                print "Invalid integer parameter, defaulting to zero. Parameter name:", arg_name
+                print("Invalid integer parameter, defaulting to zero. Parameter name:", arg_name)
 
         arg_val = int_arg_val
 
