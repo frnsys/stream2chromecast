@@ -25,7 +25,7 @@ version 0.2.1
 
 
 
-import socket, ssl, select
+import socket, ssl
 import json
 import sys
 import time
@@ -66,7 +66,7 @@ class CCMediaController():
         if is_ip_addr:
             host = device_name
             try:
-                print "ip_addr:", host, "device name:", cc_device_finder.get_device_name(host)
+                print("ip_addr:", host, "device name:", cc_device_finder.get_device_name(host))
             except socket.error:
                 sys.exit("No Chromecast found on ip:" + host)
         else:
@@ -74,7 +74,7 @@ class CCMediaController():
             if host is None:
                 sys.exit("No Chromecast found on the network")
 
-            print "device name:", name
+            print("device name:", name)
 
         return host
 
@@ -340,7 +340,7 @@ class CCMediaController():
         self.get_receiver_status()
 
         if self.receiver_app_status is None:
-            print "No media player app running"
+            print("No media player app running")
             self.close_socket()
             return
 
